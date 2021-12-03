@@ -37,7 +37,7 @@ def breed(g1: Genome, g2: Genome, get_fitness: Callable, generation: int) -> Gen
     :param generation: Current generation
     :return: Genome of the child
     """
-    if g1>g2:
+    if g1 > g2:
         better_parent = g1
         other_parent = g2
     else:
@@ -47,7 +47,7 @@ def breed(g1: Genome, g2: Genome, get_fitness: Callable, generation: int) -> Gen
     for ino in genome_dic:
         if ino in other_parent.inos:
             if not better_parent.ino_dic[ino].active or not other_parent.ino_dic[ino].active:
-                if random()<.75:
+                if random() < .75:
                     genome_dic[ino].active = False
                 else:
                     genome_dic[ino].active = True
@@ -86,11 +86,11 @@ def delta(genome1: Genome, genome2: Genome, c1: float = 1.0, c2: float = 1.0, c3
     # find excess and disjoint count
     i = 0
     j = 0
-    while i<len(genes1) or j<len(genes2):
-        if i>=len(genes1):
+    while i < len(genes1) or j < len(genes2):
+        if i >= len(genes1):
             excess += (len(genes2) - j)
             break
-        elif j>=len(genes2):
+        elif j >= len(genes2):
             excess += (len(genes1) - i)
             break
 
@@ -104,7 +104,7 @@ def delta(genome1: Genome, genome2: Genome, c1: float = 1.0, c2: float = 1.0, c3
             matching += 1
             i += 1
             j += 1
-        elif gene1.ino<gene2.ino:
+        elif gene1.ino < gene2.ino:
             disjoint += 1
             i += 1
         else:
@@ -125,8 +125,8 @@ def mutate_weights(genes: List):
     :param genes: List of genes
     """
     for connection in genes:
-        if random()<0.8:
-            if random()<0.9:
+        if random() < 0.8:
+            if random() < 0.9:
                 random_perturbation = uniform(-0.05, 0.05)
                 connection.w += random_perturbation
             else:
@@ -141,7 +141,7 @@ def mutate_connection(g: Genome):
     """
 
     # ADD CONNECTION
-    if random()<0.75:
+    if random() < 0.75:
         new_connection = False
         while not new_connection:
             to_be_connected = sample(g.nodes, 2)  # Get random new nodes to connect
@@ -169,7 +169,7 @@ def mutate_node(g: Genome):
     """
 
     # ADD NODE
-    if random()<0.75:
+    if random() < 0.75:
         connection = sample(g.genes, 1)[0]  # Get connection in which to insert node 
         connection.active = False  # Disable old connection
         old_weight = connection.w
