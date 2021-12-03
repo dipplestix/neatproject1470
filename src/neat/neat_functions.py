@@ -29,11 +29,10 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
     return population
 
 
-def breed(g1: Genome, g2: Genome, get_fitness: Callable, generation: int) -> Genome:
+def breed(g1: Genome, g2: Genome,  generation: int) -> List:
     """
     :param g1: Genome of the first parent
     :param g2: Genome of the second parent
-    :param get_fitness: Genome of the second parent
     :param generation: Current generation
     :return: Genome of the child
     """
@@ -55,11 +54,7 @@ def breed(g1: Genome, g2: Genome, get_fitness: Callable, generation: int) -> Gen
 
     genome = list(genome_dic.values())
 
-    fitness = get_fitness(genome)
-
-    child = Genome(genome, fitness, generation)
-
-    return child
+    return genome
 
 
 def delta(genome1: Genome, genome2: Genome, c1: float = 1.0, c2: float = 1.0, c3: float = .4):
