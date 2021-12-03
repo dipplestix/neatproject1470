@@ -76,6 +76,8 @@ def make_network(gen: Genome):
             # print(nn_layer.weight)
             nn_layers.append(nn_layer)
             nn_layers.append(nn.ReLU(inplace=True))
+    else:
+        out_l = layers[0]
     last_layer = nn.Linear(len(out_l), len(outputs), bias=False)
     for i in out_l:
         for o in outputs:
