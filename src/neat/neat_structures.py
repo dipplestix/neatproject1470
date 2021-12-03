@@ -10,13 +10,14 @@ class Genome:
         self.inos = set([g.ino for g in genes])
         self.ino_dic = {g.ino: g for g in genes}
         self.directedConnects = set((g.n_in, g.n_out) for g in genes)
-
+        self.active_connects = {(g.n_in, g.n_out): g.w for g in genes if g.active}
+        
     def __gt__(self, other):
         return self.fitness >= other.fitness
-
+    
     def __lt__(self, other):
         return self.fitness < other.fitness
-
+    
     def __eq__(self, other):
         return self.fitness == other.fitness
 
