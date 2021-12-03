@@ -33,8 +33,7 @@ def breed(g1: Genome, g2: Genome) -> List:
     """
     :param g1: Genome of the first parent
     :param g2: Genome of the second parent
-    :param generation: Current generation
-    :return: Genome of the child
+    :return: List of genes of the child
     """
     if g1 > g2:
         better_parent = g1
