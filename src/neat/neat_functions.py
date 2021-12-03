@@ -29,7 +29,7 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
     return population
 
 
-def breed(g1: Genome, g2: Genome,  generation: int) -> List:
+def breed(g1: Genome, g2: Genome) -> List:
     """
     :param g1: Genome of the first parent
     :param g2: Genome of the second parent
