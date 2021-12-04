@@ -4,7 +4,6 @@ from typing import List
 
 
 def get_fitness(genome: List):
-    a = genome
     return 12
 
 
