@@ -4,7 +4,6 @@ from typing import List
 
 
 def get_fitness(genome: List):
-    a = genome
     return 12
 
 
@@ -39,35 +38,25 @@ genome_1 = Genome([gene_1_0], 8)
 
 
 def test_breed_size():
-    child = breed(genome_0_low, genome_1, get_fitness=get_fitness)
-    assert len(child.genes) == 1
+    child = breed(genome_0_low, genome_1, generation=1)
+    assert len(child) == 1
 
 
 def test_breed_size2():
-    child = breed(genome_0_high, genome_1, get_fitness=get_fitness)
-    assert len(child.genes) == 2
+    child = breed(genome_0_high, genome_1, generation=1)
+    assert len(child) == 2
 
 
 def test_breed_weights():
-    child = breed(genome_0_high, genome_1, get_fitness=get_fitness)
-    assert child.genes[0].w == .3 or child.genes[0].w == .7
+    child = breed(genome_0_high, genome_1, generation=1)
+    assert child[0].w == .3 or child[0].w == .7
 
 
 def test_breed_weights2():
-    child = breed(genome_0_high, genome_1, get_fitness=get_fitness)
-    assert child.genes[1].w == .12
-
-
-def test_breed_fitness():
-    child = breed(genome_0_high, genome_1, get_fitness=get_fitness)
-    assert child.fitness == 12
-
-
-def test_breed_inos():
-    child = breed(genome_0_high, genome_1, get_fitness=get_fitness)
-    assert child.inos == set([0, 1])
-
+    child = breed(genome_0_high, genome_1, generation=1)
+    assert child[1].w == .12
+    
 
 def test_breed_ino_dic():
-    child = breed(genome_0_high, genome_1, get_fitness=get_fitness)
-    assert len(child.ino_dic) == 2
+    child = breed(genome_0_high, genome_1, generation=1)
+    assert len(child) == 2

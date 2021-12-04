@@ -1,5 +1,5 @@
 from neat.neat_structures import Genome, Gene
-from neat.neat_functions import mutateWeights, mutateConnection, mutateNode
+from neat.neat_functions import mutate_weights, mutate_connection, mutate_node
 from typing import List
 from random import seed
 
@@ -42,7 +42,7 @@ genome = Genome(genes, fitness=0)
 
 def test_mutateWeights():
 	seed(10)
-	mutateWeights(genome.genes)
+	mutate_weights(genome.genes)
 	weights = sum(gene.w for gene in genome.genes)
 	assert weights != 1.5
 
@@ -54,7 +54,7 @@ def test_mutateWeights():
 #  (1)    (0)
 def test_mutateConnection1():
 	seed(10)
-	mutateConnection(genome)
+	mutate_connection(genome)
 	assert 3 in genome.inos
 	
 def test_mutateConnection2():
@@ -75,7 +75,7 @@ def test_mutateConnection4():
 #  (1)    (0)
 def test_mutateNode1():
 	seed(10)
-	mutateNode(genome)
+	mutate_node(genome)
 	assert genome.inos == {0,1,2,3,4,5}
 
 def test_mutateNode2():
