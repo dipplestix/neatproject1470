@@ -76,7 +76,7 @@ def make_network(gen: Genome):
     else:
         out_l = layers[0]
     
-    def model(val_in):
+    def model(val_in, final_layer=torch.sigmoid):
         if len(val_in.shape) == 1:
             val_in = torch.reshape(val_in, [1, -1])
         assert len(val_in.shape) == 2, 'Requires 2D Tensor'
@@ -88,8 +88,11 @@ def make_network(gen: Genome):
             loop_value = layer(ins)
             if i != len(nn_layers) - 1:
                 pass
-            loop_value = torch.sigmoid(loop_value)
+            if i < len(nn_layers) - 1:
+                loop_value = torch.sigmoid(loop_value)
+            loop_value = final_layer(loop_value)
             values[:, out_ls[i]] = loop_value
+            
         
         return values[:, outputs]
     
