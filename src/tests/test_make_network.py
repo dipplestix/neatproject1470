@@ -12,24 +12,24 @@ genome_2 = Genome([gen1, gen2], 12)
 
 def test_make_network_1():
   m = make_network(genome_1)
-  assert m(torch.tensor([0.]) == torch.sigmoid(torch.tensor(0.))
+  assert m(torch.tensor([0.])) == torch.sigmoid(torch.tensor(0.))
 
            
 def test_make_network_2():
   m = make_network(genome_1)
-  assert m(torch.tensor([1]) == torch.sigmoid(torch.tensor(100.))
+  assert m(torch.tensor([1])) == torch.sigmoid(torch.tensor(100.))
 
            
 def test_make_network_3():
   m = make_network(genome_2)
-  assert m(torch.tensor([0]) == torch.sigmoid(torch.tensor(0.))
+  assert m(torch.tensor([0])) == torch.sigmoid(torch.tensor(0.))
 
            
 def test_make_network_4():
   m = make_network(genome_2)
-  assert m(torch.tensor([1]) == torch.sigmoid(torch.tensor(130.))
+  assert m(torch.tensor([1])) == torch.sigmoid(torch.tensor(130.))
 
           
 def test_make_network_5():
   m = make_network(genome_2)
-  assert m(torch.tensor([.1]) == torch.sigmoid(torch.tensor(13.))
+  assert m(torch.tensor([.1])) == torch.sigmoid(torch.tensor(13.))
