@@ -86,11 +86,10 @@ def make_network(gen: Genome):
         for i, layer in enumerate(nn_layers):
             ins = values[:, in_ls[i]]
             loop_value = layer(ins)
-            if i != len(nn_layers) - 1:
-                pass
             if i < len(nn_layers) - 1:
                 loop_value = torch.sigmoid(loop_value)
-            loop_value = final_layer(loop_value)
+            else:
+                loop_value = final_layer(loop_value)
             values[:, out_ls[i]] = loop_value
             
         
