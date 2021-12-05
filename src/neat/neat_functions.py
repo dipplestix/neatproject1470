@@ -131,7 +131,7 @@ def mutate_weights(genes: List):
                 connection.w = new_weight
 
 
-def mutate_connection(g: Genome):
+def mutate_connection(g: GeneList):
     """
     Function to randomly mutates the genome to add a new connection
     :param g: Genome to mutate
@@ -159,7 +159,7 @@ def mutate_connection(g: Genome):
         g.directedConnects.add((node1, node2))
 
 
-def mutate_node(g: Genome):
+def mutate_node(g: GeneList):
     """
     Function to randomly mutates the genome to add a new node
     :param g: Genome to mutate	
