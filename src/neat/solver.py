@@ -1,6 +1,7 @@
 from neat.neat_structures import Genome, Gene, Species
 from neat.neat_functions import *
 from typing import Callable
+from copy import deepcopy
 import numpy as np
 import random
 import time
@@ -17,6 +18,14 @@ def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callabl
     delta_thresh = 3
     species_dic = {i: 0 for i in pop}
 
+    best_fit = -np.inf
+    best = None
+
+    for ind in pop:
+        if ind.fitness > best_fit:
+            best_fit = ind.fitness
+            best = ind
+
     # Initiate the first species and add everything to it
     first = pop[0]
 
@@ -27,14 +36,17 @@ def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callabl
     # Run for however long we tell it to
     while time.time() - start < max_t:
         ino_dic = {}
-        new_species = []
+        new_species = deepcopy(species)
+        new_species_dic = {}
         # Increment the generation and reset the population
         generation += 1
         new_pop = []
+        new_gene_lists = []
 
-        for s in species:
+        for s in new_species:
             s.find_champion()
             s.find_rep()
+            s.next_generation()
             new_pop.append(s.champion)
 
         while len(new_pop) < n_pop:
@@ -52,43 +64,42 @@ def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callabl
                 if random.random() < 0.001:
                     other = random.sample(pop)
                 else:
-                    other = random.sample(species[ind].genomes)
+                    other = random.sample(species_dic[ind].genomes)
                 other_genes = other.gene_list
                 other_fit = other.fitness
                 new_gene_list = breed(new_gene_list, other_genes, fit, other_fit)
-
 
             # Assign to a species
             in_species = False
             for s in new_species:
                 delt = delta(new_gene_list, s.rep.gene_list)
                 if delt < delta_thresh:
-                    species.add(ind)
+                    s.add(ind)
                     in_species = True
+                    new_species_dic[ind] = s
                     break
             if not in_species:
                 new_species.append(Species(ind))
+                new_species_dic[ind] = new_species[-1]
 
-
+            new_gene_lists.append(new_gene_list)
+        for gene_list in new_gene_lists:
             # Build model and find fitness
             model = make_network(new_gene_list)
             new_fit = get_fitness(model)
+            new_ind = Genome(new_gene_list, new_fit/len(new_species_dic[gene_list].genomes))
 
-            new_ind = Genome(new_gene_list, new_fit)
+            if new_fit > best_fit:
+                best_fit = new_fit
+                best = new_ind
 
             new_pop.append(new_ind)
 
-        # Clear the old species list except for the rep and find the species for each individual
-        s.next_generation()
-        for ind in new_pop:
-            in_species = False
-            for s in species:
-                delt = delta(ind.gene_list, s.rep.gene_list)
-                if delt < delta_thresh:
-                    species.add(ind)
-                    in_species = True
-                    break
-            if not in_species:
-                species.append(Species(ind))
 
+        # Get ready for next generation
+        pop = new_pop
+        species = new_species
+        species_dic = new_species_dic
+
+    return best
 
