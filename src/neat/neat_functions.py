@@ -44,8 +44,8 @@ def breed(g1: GeneList, g2: GeneList, f1: float, f2: float) -> List:
         better_parent = g1
         other_parent = g2
     else:
-        better_parent = f2
-        other_parent = f1
+        better_parent = g2
+        other_parent = g1
     genome_dic = deepcopy(better_parent.ino_dic)
     for ino in genome_dic:
         if ino in other_parent.inos:
