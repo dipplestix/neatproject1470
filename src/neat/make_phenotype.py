@@ -56,8 +56,12 @@ def make_network(gen: GeneList):
             if i == 0:
                 in_l = inputs
             else:
-                in_l = out_l
-            out_l = layers[i+1]
+                in_l = layers[i]
+            if i == len(layers) - 1:
+                out_l = outputs
+            else:
+                out_l = layers[i+1]
+            out_l = [n for n in out_l if n not in inputs]
             nn_layer = nn.Linear(len(in_l), len(out_l), bias=False)
             for i, ni in enumerate(in_l):
                 for j, no in enumerate(out_l):
@@ -76,22 +80,19 @@ def make_network(gen: GeneList):
     else:
         out_l = layers[0]
     
-    def model(val_in, final_layer=torch.sigmoid):
+    def model(val_in):
         if len(val_in.shape) == 1:
             val_in = torch.reshape(val_in, [1, -1])
         assert len(val_in.shape) == 2, 'Requires 2D Tensor'
         values = torch.zeros(val_in.shape[0], max_node+1)
         values[:, inputs] = val_in
-        
         for i, layer in enumerate(nn_layers):
             ins = values[:, in_ls[i]]
             loop_value = layer(ins)
-            if i < len(nn_layers) - 1:
-                loop_value = torch.sigmoid(loop_value)
-            else:
-                loop_value = final_layer(loop_value)
+            if i != len(nn_layers) - 1:
+                pass
+            loop_value = torch.sigmoid(loop_value)
             values[:, out_ls[i]] = loop_value
-            
         
         return values[:, outputs]
     
