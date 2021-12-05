@@ -32,27 +32,29 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
     return population, ino
 
 
-def breed(g1: Genome, g2: Genome) -> List:
+def breed(g1: GeneList, g2: GeneList, f1: float, f2: float) -> List:
     """
     :param g1: Genome of the first parent
     :param g2: Genome of the second parent
+    :param f1: Genome of the first parent
+    :param f2: Genome of the second parent
     :return: List of genes of the child
     """
-    if g1 > g2:
+    if f1 > f2:
         better_parent = g1
         other_parent = g2
     else:
-        better_parent = g2
-        other_parent = g1
-    genome_dic = deepcopy(better_parent.gene_list.ino_dic)
+        better_parent = f2
+        other_parent = f1
+    genome_dic = deepcopy(better_parent.ino_dic)
     for ino in genome_dic:
-        if ino in other_parent.gene_list.inos:
-            if not better_parent.gene_list.ino_dic[ino].active or not other_parent.gene_list.ino_dic[ino].active:
+        if ino in other_parent.inos:
+            if not better_parent.ino_dic[ino].active or not other_parent.ino_dic[ino].active:
                 if random() < .75:
                     genome_dic[ino].active = False
                 else:
                     genome_dic[ino].active = True
-            genome_dic[ino].w = choice([better_parent.gene_list.ino_dic[ino].w, other_parent.gene_list.ino_dic[ino].w])
+            genome_dic[ino].w = choice([better_parent.ino_dic[ino].w, other_parent.ino_dic[ino].w])
 
     gene_list = GeneList(list(genome_dic.values()))
 
@@ -116,78 +118,87 @@ def delta(gene_list1: GeneList, gene_list2: GeneList, c1: float = 1.0, c2: float
     return delta_val
 
 
-def mutate_weights(genes: List):
+def mutate_weights(gene_list: GeneList):
     """
     Function to randomly mutates the genome to alter the connection weights
-    :param genes: List of genes
+    :param gene_list: List of genes
     """
-    for connection in genes:
-        if random() < 0.8:
-            if random() < 0.9:
-                random_perturbation = uniform(-0.05, 0.05)
-                connection.w += random_perturbation
-            else:
-                new_weight = uniform(-1, 1)
-                connection.w = new_weight
+    new_genes = deepcopy(gene_list.genes)
+    for connection in new_genes:
+        if random() < 0.9:
+            random_perturbation = uniform(-0.05, 0.05)
+            connection.w += random_perturbation
+        else:
+            new_weight = uniform(-1, 1)
+            connection.w = new_weight
+
+    return GeneList(new_genes)
 
 
-def mutate_connection(g: GeneList):
+def new_link(gene_list: GeneList, ino: int, ino_dic: dict, inputs: List, outputs: List):
     """
     Function to randomly mutates the genome to add a new connection
-    :param g: Genome to mutate
+    :param gene_list: GeneList to mutate
+    :param ino: innovation number
+    :param ino_dic: innovation dictionary to check if it has already been made
+    :param inputs: list of input nodes
+    :param outputs: list of output nodes
+
     """
 
-    # ADD CONNECTION
-    if random() < 0.75:
-        new_connection = False
-        while not new_connection:
-            to_be_connected = sample(g.nodes, 2)  # Get random new nodes to connect
-            node1, node2 = to_be_connected[0], to_be_connected[1]
-            if (node1, node2) in g.directedConnects:  # If existing connection, start over 
-                continue
-            new_connection = True
+    new_connection = False
+    while not new_connection:
+        to_be_connected = sample(g.nodes, 2)  # Get random new nodes to connect
+        node1, node2 = to_be_connected[0], to_be_connected[1]
+        if (node1, node2) in g.directedConnects or node2 in inputs or node1 in outputs:  # If existing connection, start over
+            continue
+        new_connection = True
 
-        random_weight = uniform(-1, 1)  # Get new Weight
-
-        # TODO: figure out innovation number
-        ino = max(g.inos)
+    try:
+        ino_num = ino_dic[(node1, node2)]
+    except KeyError:
+        ino_num = ino
+        ino_dic[(node1, node2)] = ino
         ino += 1
-        new_connection = Gene(node1, node2, random_weight, ino, active=True)
-        g.genes.append(new_connection)
-        g.inos.add(ino)
-        g.ino_dic.update({ino: new_connection})
-        g.directedConnects.add((node1, node2))
+
+    random_weight = uniform(-1, 1)  # Get new Weight
+
+    new_connection = Gene(node1, node2, random_weight, ino_num, active=True)
+    new_genes = deepcopy(gene_list.genes)
+
+    new_genes.append(new_connection)
+
+    return GeneList(new_genes), ino, ino_dic
 
 
-def mutate_node(g: GeneList):
+def new_node(gene_list: GeneList, ino: int, ino_dic: dict):
     """
     Function to randomly mutates the genome to add a new node
-    :param g: Genome to mutate	
+    :param gene_list: GeneList to mutate
+    :param ino: innovation number
+    :param ino_dic: innovation dictionary to check if it has already been made
     """
+    new_genes = deepcopy(gene_list.genes)
+    connection = sample(new_genes, 1)  # Get connection in which to insert node
+    connection.active = False  # Disable old connection
+    old_weight = connection.w
+    new_weight = 1
+    node1, node2 = connection.n_in, connection.n_out
 
-    # ADD NODE
-    if random() < 0.75:
-        connection = sample(g.genes, 1)[0]  # Get connection in which to insert node 
-        connection.active = False  # Disable old connection
-        old_weight = connection.w
-        new_weight = 1
-        node1, node2 = connection.n_in, connection.n_out
-        g.directedConnects.remove((node1, node2))  # Remove directed connection
+    new_node = len(g.nodes)  # Get number for new node
 
-        new_node = len(g.nodes)  # Get number for new node
-        g.nodes.add(new_node)
+    try:
+        ino_num = ino_dic[(node1, new_node)]
+    except KeyError:
+        ino_num = ino
+        ino_dic[(node1, new_node)] = ino
+        ino_dic[(new_node, node2)] = ino + 1
+        ino += 2
 
-        ino = max(g.inos)
-        ino += 1
-        new_connection1 = Gene(node1, new_node, new_weight, ino, active=True)  # Connect node1 and new node
-        g.genes.append(new_connection1)
-        g.inos.add(ino)
-        g.ino_dic.update({ino: new_connection1})
-        g.directedConnects.add((node1, new_node))
+    new_connection1 = Gene(node1, new_node, new_weight, ino_num, active=True)  # Connect node1 and new node
+    new_genes.genes.append(new_connection1)
 
-        ino += 1
-        new_connection2 = Gene(new_node, node2, old_weight, ino, active=True)  # connect new node and node2
-        g.genes.append(new_connection2)
-        g.inos.add(ino)
-        g.ino_dic.update({ino: new_connection2})
-        g.directedConnects.add((new_node, node2))
+    new_connection2 = Gene(new_node, node2, old_weight, ino_num + 1, active=True)  # connect new node and node2
+    new_genes.genes.append(new_connection2)
+
+    return GeneList(new_genes), ino, ino_dic
