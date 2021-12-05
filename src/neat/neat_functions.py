@@ -1,4 +1,5 @@
-from neat.neat_structures import Genome, Gene
+from neat_structures import Genome, Gene, GeneList
+from make_phenotype import make_network
 from copy import deepcopy
 from random import random, choice, uniform, sample
 from typing import Callable, List
@@ -6,7 +7,7 @@ from typing import Callable, List
 
 def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_size: int = 150):
     ino = 0
-    population_genomes = [[] for _ in range(pop_size)]
+    population_gene_lists = [[] for _ in range(pop_size)]
 
     # Make each genome gene-by-gene with random weights
     for i in range(n_inputs):
@@ -18,13 +19,15 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
                                 ino=ino,
                                 active=True
                                 )
-                population_genomes[k].append(new_gene)
+                population_gene_lists[k].append(new_gene)
             ino += 1
 
     population = []
-    for gen in population_genomes:
-        fitness = get_fitness(gen)
-        population.append(Genome(gen, fitness, generation=0))
+    for gen in population_gene_lists:
+        gene_list = GeneList(gen)
+        model = make_network(gene_list)
+        fitness = get_fitness(model)
+        population.append(Genome(gene_list, fitness, generation=0))
 
     return population
 
@@ -51,22 +54,22 @@ def breed(g1: Genome, g2: Genome) -> List:
                     genome_dic[ino].active = True
             genome_dic[ino].w = choice([better_parent.ino_dic[ino].w, other_parent.ino_dic[ino].w])
 
-    genome = list(genome_dic.values())
+    gene_list = GeneList(genome_dic.values())
 
-    return genome
+    return gene_list
 
 
-def delta(genome1: Genome, genome2: Genome, c1: float = 1.0, c2: float = 1.0, c3: float = .4):
+def delta(gene_list1: GeneList, gene_list2: GeneList, c1: float = 1.0, c2: float = 1.0, c3: float = .4):
     """
     :param c1: Excess coefficient
     :param c2: Disjoint coefficient
     :param c3: Matching coefficient
-    :param genome1: First genome
-    :param genome2: Second genome
+    :param gene_list1: First genome
+    :param gene_list2: Second genome
     :return: Compatibility distance between genomes
     """
-    genes1 = genome1.genes
-    genes2 = genome2.genes
+    genes1 = gene_list1.genes
+    genes2 = gene_list2.genes
     n = max(len(genes1), len(genes2))
 
     # counts

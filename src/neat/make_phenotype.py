@@ -1,4 +1,4 @@
-from neat.neat_structures import Genome, Gene
+from neat_structures import Genome, Gene, GeneList
 from copy import deepcopy
 import torch
 from torch import nn
@@ -21,7 +21,7 @@ def make_dics(connections):
     return fwd, rev
 
 
-def make_network(gen: Genome):
+def make_network(gen: GeneList):
     # FInd what's input and output
     fwd, rev = make_dics(gen.active_connects.keys())
     outputs = [n for n in gen.nodes if n not in fwd.keys()]
