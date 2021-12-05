@@ -66,7 +66,7 @@ class Species:
         self.rep = random.choice(self.genomes)
 
     def next_generation(self):
-        self.genome = []
+        self.genomes = []
         self.best = -np.inf
         self.champion = None
 
