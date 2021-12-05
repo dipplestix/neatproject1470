@@ -1,4 +1,5 @@
-from neat.neat_structures import Genome, Gene
+from neat.neat_structures import Genome, Gene, GeneList
+from neat.make_phenotype import make_network
 from copy import deepcopy
 from random import random, choice, uniform, sample
 from typing import Callable, List
@@ -6,7 +7,7 @@ from typing import Callable, List
 
 def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_size: int = 150):
     ino = 0
-    population_genomes = [[] for _ in range(pop_size)]
+    population_gene_lists = [[] for _ in range(pop_size)]
 
     # Make each genome gene-by-gene with random weights
     for i in range(n_inputs):
@@ -18,13 +19,15 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
                                 ino=ino,
                                 active=True
                                 )
-                population_genomes[k].append(new_gene)
+                population_gene_lists[k].append(new_gene)
             ino += 1
 
     population = []
-    for gen in population_genomes:
-        fitness = get_fitness(gen)
-        population.append(Genome(gen, fitness, generation=0))
+    for gen in population_gene_lists:
+        gene_list = GeneList(gen)
+        model = make_network(gene_list)
+        fitness = get_fitness(model)
+        population.append(Genome(gene_list, fitness, generation=0))
 
     return population
 
@@ -41,32 +44,32 @@ def breed(g1: Genome, g2: Genome) -> List:
     else:
         better_parent = g2
         other_parent = g1
-    genome_dic = deepcopy(better_parent.ino_dic)
+    genome_dic = deepcopy(better_parent.gene_list.ino_dic)
     for ino in genome_dic:
-        if ino in other_parent.inos:
-            if not better_parent.ino_dic[ino].active or not other_parent.ino_dic[ino].active:
+        if ino in other_parent.gene_list.inos:
+            if not better_parent.gene_list.ino_dic[ino].active or not other_parent.gene_list.ino_dic[ino].active:
                 if random() < .75:
                     genome_dic[ino].active = False
                 else:
                     genome_dic[ino].active = True
-            genome_dic[ino].w = choice([better_parent.ino_dic[ino].w, other_parent.ino_dic[ino].w])
+            genome_dic[ino].w = choice([better_parent.gene_list.ino_dic[ino].w, other_parent.gene_list.ino_dic[ino].w])
 
-    genome = list(genome_dic.values())
+    gene_list = GeneList(list(genome_dic.values()))
 
-    return genome
+    return gene_list
 
 
-def delta(genome1: Genome, genome2: Genome, c1: float = 1.0, c2: float = 1.0, c3: float = .4):
+def delta(gene_list1: GeneList, gene_list2: GeneList, c1: float = 1.0, c2: float = 1.0, c3: float = .4):
     """
     :param c1: Excess coefficient
     :param c2: Disjoint coefficient
     :param c3: Matching coefficient
-    :param genome1: First genome
-    :param genome2: Second genome
+    :param gene_list1: First genome
+    :param gene_list2: Second genome
     :return: Compatibility distance between genomes
     """
-    genes1 = genome1.genes
-    genes2 = genome2.genes
+    genes1 = gene_list1.genes
+    genes2 = gene_list2.genes
     n = max(len(genes1), len(genes2))
 
     # counts
@@ -128,7 +131,7 @@ def mutate_weights(genes: List):
                 connection.w = new_weight
 
 
-def mutate_connection(g: Genome):
+def mutate_connection(g: GeneList):
     """
     Function to randomly mutates the genome to add a new connection
     :param g: Genome to mutate
@@ -156,7 +159,7 @@ def mutate_connection(g: Genome):
         g.directedConnects.add((node1, node2))
 
 
-def mutate_node(g: Genome):
+def mutate_node(g: GeneList):
     """
     Function to randomly mutates the genome to add a new node
     :param g: Genome to mutate	

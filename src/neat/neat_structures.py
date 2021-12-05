@@ -1,17 +1,22 @@
 from typing import List
 
 
-class Genome:
-    def __init__(self, genes: List, fitness: float, generation: int = 0):
-        self.genes = genes 
+class GeneList:
+    def __init__(self, genes: List):
+        self.genes = genes
         self.nodes = set.union(set(g.n_in for g in genes), set(g.n_out for g in genes))
-        self.fitness = fitness
-        self.generation = generation
         self.inos = set([g.ino for g in genes])
         self.ino_dic = {g.ino: g for g in genes}
         self.directedConnects = set((g.n_in, g.n_out) for g in genes)
         self.active_connects = {(g.n_in, g.n_out): g.w for g in genes if g.active}
-        
+
+
+class Genome:
+    def __init__(self, gene_list: GeneList, fitness: float, generation: int = 0):
+        self.gene_list = gene_list
+        self.fitness = fitness
+        self.generation = generation
+
     def __gt__(self, other):
         return self.fitness >= other.fitness
     

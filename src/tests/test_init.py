@@ -14,4 +14,4 @@ def test_init():
 
 def test_init2():
     pop = initialization(5, 3, get_fitness, pop_size=10)
-    assert len(pop[0].genes) == 15
+    assert len(pop[0].gene_list.genes) == 15
