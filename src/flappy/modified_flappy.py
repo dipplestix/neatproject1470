@@ -136,7 +136,6 @@ def run_model(model):
         movementInfo = {'playery': 244, 'basex': 0, 'playerIndexGen': playerIndexGen}
         FPSCLOCK.tick(FPS)
         crashInfo = mainGame(movementInfo, model)
-        print(f"SCORE: {crashInfo['score']}")
         return crashInfo['score']
         # showGameOverScreen(crashInfo)
 
@@ -184,42 +183,42 @@ def mainGame(movementInfo, model):
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-
-            # process flappy bird environment data
-            
-            # identify next pipe
-            i = 0
-            while playerx > upperPipes[i]['x']:
-                i += 1
-
-            # pass next pipe data to the model
-            next_upper_pipe = upperPipes[i]
-            next_lower_pipe = lowerPipes[i]
-            upper_pipe_x = next_upper_pipe['x']
-            upper_pipe_y = next_upper_pipe['y']
-            lower_pipe_x = next_lower_pipe['x']
-            lower_pipe_y = next_lower_pipe['y']
-            result = 0 if not model else model(torch.tensor([
-                playerx,
-                playery,
-                upper_pipe_x,
-                upper_pipe_y,
-                lower_pipe_x,
-                lower_pipe_y,
-                1.0
-            ])).item()
-
-            if result > 0.5 and playery > -2 * IMAGES['player'][0].get_height():
-                # flap
-                playerVelY = playerFlapAcc
-                playerFlapped = True
-                SOUNDS['wing'].play()
-
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
                 if playery > -2 * IMAGES['player'][0].get_height():
                     playerVelY = playerFlapAcc
                     playerFlapped = True
                     SOUNDS['wing'].play()
+
+        # process flappy bird environment data
+        # identify next pipe
+        i = 0
+        while playerx > upperPipes[i]['x']:
+            i += 1
+
+        # pass next pipe data to the model
+        next_upper_pipe = upperPipes[i]
+        next_lower_pipe = lowerPipes[i]
+        upper_pipe_x = next_upper_pipe['x']
+        upper_pipe_y = next_upper_pipe['y']
+        lower_pipe_x = next_lower_pipe['x']
+        lower_pipe_y = next_lower_pipe['y']
+        result = 0 if not model else model(torch.tensor([
+            playerx,
+            playery,
+            upper_pipe_x,
+            upper_pipe_y,
+            lower_pipe_x,
+            lower_pipe_y,
+            1.0
+        ]))[0][0].item()
+        result = 1
+
+        # based on model, decide to flap if has not flapped already
+        if result > 0.5 and playery > -2 * IMAGES['player'][0].get_height() and not playerFlapped:
+            # flap
+            playerVelY = playerFlapAcc
+            playerFlapped = True
+            SOUNDS['wing'].play()
 
         # check for crash here
         crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
