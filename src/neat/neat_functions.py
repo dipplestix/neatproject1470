@@ -148,9 +148,9 @@ def new_link(gene_list: GeneList, ino: int, ino_dic: dict, inputs: List, outputs
 
     new_connection = False
     while not new_connection:
-        to_be_connected = sample(g.nodes, 2)  # Get random new nodes to connect
+        to_be_connected = sample(gene_list.nodes, 2)  # Get random new nodes to connect
         node1, node2 = to_be_connected[0], to_be_connected[1]
-        if (node1, node2) in g.directedConnects or node2 in inputs or node1 in outputs:  # If existing connection, start over
+        if (node1, node2) in gene_list.directedConnects or node2 in inputs or node1 in outputs:  # If existing connection, start over
             continue
         new_connection = True
 
@@ -179,26 +179,27 @@ def new_node(gene_list: GeneList, ino: int, ino_dic: dict):
     :param ino_dic: innovation dictionary to check if it has already been made
     """
     new_genes = deepcopy(gene_list.genes)
-    connection = sample(new_genes, 1)  # Get connection in which to insert node
+    connection = choice(new_genes)  # Get connection in which to insert node
+    print(connection.active)
     connection.active = False  # Disable old connection
     old_weight = connection.w
     new_weight = 1
     node1, node2 = connection.n_in, connection.n_out
 
-    new_node = len(g.nodes)  # Get number for new node
+    new_node_num = len(gene_list.nodes)  # Get number for new node
 
     try:
-        ino_num = ino_dic[(node1, new_node)]
+        ino_num = ino_dic[(node1, new_node_num)]
     except KeyError:
         ino_num = ino
-        ino_dic[(node1, new_node)] = ino
-        ino_dic[(new_node, node2)] = ino + 1
+        ino_dic[(node1, new_node_num)] = ino
+        ino_dic[(new_node_num, node2)] = ino + 1
         ino += 2
 
-    new_connection1 = Gene(node1, new_node, new_weight, ino_num, active=True)  # Connect node1 and new node
-    new_genes.genes.append(new_connection1)
+    new_connection1 = Gene(node1, new_node_num, new_weight, ino_num, active=True)  # Connect node1 and new node
+    new_genes.append(new_connection1)
 
-    new_connection2 = Gene(new_node, node2, old_weight, ino_num + 1, active=True)  # connect new node and node2
-    new_genes.genes.append(new_connection2)
+    new_connection2 = Gene(new_node_num, node2, old_weight, ino_num + 1, active=True)  # connect new node and node2
+    new_genes.append(new_connection2)
 
     return GeneList(new_genes), ino, ino_dic

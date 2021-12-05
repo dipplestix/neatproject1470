@@ -1,5 +1,5 @@
 from neat.neat_structures import Genome, Gene, GeneList
-from neat.neat_functions import mutate_weights, mutate_connection, mutate_node
+from neat.neat_functions import mutate_weights, new_link, new_node
 from typing import List
 from random import seed
 
@@ -43,8 +43,8 @@ genome = GeneList(genes)
 
 def test_mutateWeights():
     seed(10)
-    mutate_weights(genome.genes)
-    weights = sum(gene.w for gene in genome.genes)
+    new_genes = mutate_weights(genome)
+    weights = sum(gene.w for gene in new_genes.genes)
     assert weights != 1.5
 
 
@@ -54,22 +54,25 @@ def test_mutateWeights():
 #   | /  \ 
 #   |/    \
 #  (1)    (0)
-def test_mutateConnection1():
+def test_new_link1():
     seed(10)
-    mutate_connection(genome)
-    assert 3 in genome.inos
+    new_genes, ino, ino_dic = new_link(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2}, inputs=[0, 1], outputs=[3])
+    assert 3 in new_genes.inos
 
 
-def test_mutateConnection2():
-    assert len(genome.genes) == 4
+def test_new_link2():
+    new_genes, ino, ino_dic = new_link(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2}, inputs=[0, 1], outputs=[3])
+    assert len(new_genes.genes) == 4
 
 
-def test_mutateConnection3():
-    assert genome.genes[-1].w == 0.15618260226894076
+def test_new_link3():
+    new_genes, ino, ino_dic = new_link(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2}, inputs=[0, 1], outputs=[3])
+    assert new_genes.genes[-1].w == -0.7320549459017323
 
 
-def test_mutateConnection4():
-    assert (3, 1) in genome.directedConnects
+def test_new_link4():
+    new_genes, ino, ino_dic = new_link(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2}, inputs=[0, 1], outputs=[3])
+    assert (2, 3) in new_genes.directedConnects
 
 
 #     (3)
@@ -79,19 +82,22 @@ def test_mutateConnection4():
 #   | /  \ 
 #   |/    \
 #  (1)    (0)
-def test_mutateNode1():
+def test_new_node1():
     seed(10)
-    mutate_node(genome)
-    assert genome.inos == {0, 1, 2, 3, 4, 5}
+    new_genes, ino, ino_dic = new_node(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2})
+    assert new_genes.inos == {0, 1, 2, 3, 4}
 
 
-def test_mutateNode2():
-    assert len(genome.genes) == 6
+def test_new_node2():
+    new_genes, ino, ino_dic = new_node(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2})
+    assert len(new_genes.genes) == 5
 
 
-def test_mutateNode3():
-    assert 4 in genome.nodes
+def test_new_node3():
+    new_genes, ino, ino_dic = new_node(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2})
+    assert 4 in new_genes.nodes
 
 
-def test_mutateNode4():
-    assert (3, 4) and (4, 1) in genome.directedConnects
+def test_new_node4():
+    new_genes, ino, ino_dic = new_node(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2})
+    assert (0, 4) and (4, 2) in new_genes.directedConnects
