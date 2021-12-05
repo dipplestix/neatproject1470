@@ -11,7 +11,7 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
 
     # Make each genome gene-by-gene with random weights
     for i in range(n_inputs):
-        for j in range(n_outputs):
+        for j in range(n_inputs, n_outputs+n_inputs):
             for k in range(pop_size):
                 new_gene = Gene(n_in=i,
                                 n_out=j,
