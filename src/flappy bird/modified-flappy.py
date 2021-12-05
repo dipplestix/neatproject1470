@@ -3,8 +3,10 @@ import random
 import sys
 import pygame
 from pygame.locals import *
+import torch
 
 FPS = 30
+# SCREENWIDTH = 288
 SCREENWIDTH = 288
 SCREENHEIGHT = 512
 PIPEGAPSIZE = 100  # gap between upper and lower part of pipe
@@ -52,7 +54,7 @@ except NameError:
     xrange = range
 
 
-def main():
+def run_model(model):
     global SCREEN, FPSCLOCK
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
@@ -130,74 +132,16 @@ def main():
             getHitmask(IMAGES['player'][2]),
         )
 
-        movementInfo = showWelcomeAnimation()
-        crashInfo = mainGame(movementInfo)
+        playerIndexGen = cycle([0, 1, 2, 1])
+        movementInfo = {'playery': 244, 'basex': 0, 'playerIndexGen': playerIndexGen}
+        FPSCLOCK.tick(FPS)
+        crashInfo = mainGame(movementInfo, model)
         print(f"SCORE: {crashInfo['score']}")
-        return
+        return crashInfo['score']
         # showGameOverScreen(crashInfo)
 
 
-def showWelcomeAnimation():
-    """Shows welcome screen animation of flappy bird"""
-    # index of player to blit on screen
-    playerIndex = 0
-    playerIndexGen = cycle([0, 1, 2, 1])
-    # iterator used to change playerIndex after every 5th iteration
-    loopIter = 0
-
-    playerx = int(SCREENWIDTH * 0.2)
-    playery = int((SCREENHEIGHT - IMAGES['player'][0].get_height()) / 2)
-
-    messagex = int((SCREENWIDTH - IMAGES['message'].get_width()) / 2)
-    messagey = int(SCREENHEIGHT * 0.12)
-
-    basex = 0
-    # amount by which base can maximum shift to left
-    baseShift = IMAGES['base'].get_width() - IMAGES['background'].get_width()
-
-    # player shm for up-down motion on welcome screen
-    playerShmVals = {'val': 0, 'dir': 1}
-
-    # start immediately
-    FPSCLOCK.tick(FPS)
-    return {
-        'playery': playery + playerShmVals['val'],
-        'basex': basex,
-        'playerIndexGen': playerIndexGen,
-    }
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                # make first flap sound and return values for mainGame
-                SOUNDS['wing'].play()
-                return {
-                    'playery': playery + playerShmVals['val'],
-                    'basex': basex,
-                    'playerIndexGen': playerIndexGen,
-                }
-
-        # adjust playery, playerIndex, basex
-        if (loopIter + 1) % 5 == 0:
-            playerIndex = next(playerIndexGen)
-        loopIter = (loopIter + 1) % 30
-        basex = -((-basex + 4) % baseShift)
-        playerShm(playerShmVals)
-
-        # draw sprites
-        SCREEN.blit(IMAGES['background'], (0, 0))
-        SCREEN.blit(IMAGES['player'][playerIndex],
-                    (playerx, playery + playerShmVals['val']))
-        SCREEN.blit(IMAGES['message'], (messagex, messagey))
-        SCREEN.blit(IMAGES['base'], (basex, BASEY))
-
-        pygame.display.update()
-        FPSCLOCK.tick(FPS)
-
-
-def mainGame(movementInfo):
+def mainGame(movementInfo, model):
     score = playerIndex = loopIter = 0
     playerIndexGen = movementInfo['playerIndexGen']
     playerx, playery = int(SCREENWIDTH * 0.2), movementInfo['playery']
@@ -240,6 +184,36 @@ def mainGame(movementInfo):
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+
+            # process flappy bird environment data
+            
+            # identify next pipe
+            i = 0
+            while playerx > upperPipes[i]['x']:
+                i += 1
+
+            # pass next pipe data to the model
+            next_upper_pipe = upperPipes[i]
+            next_lower_pipe = upperPipes[i]
+            upper_pipe_x = next_upper_pipe['x']
+            upper_pipe_y = next_upper_pipe['y']
+            lower_pipe_x = next_lower_pipe['x']
+            lower_pipe_y = next_lower_pipe['y']
+            result = model(torch.tensor([
+                playerx,
+                playery,
+                upper_pipe_x,
+                upper_pipe_y,
+                lower_pipe_x,
+                lower_pipe_y
+            ])).item()
+
+            if result > 0.5 and playery > -2 * IMAGES['player'][0].get_height():
+                # flap
+                playerVelY = playerFlapAcc
+                playerFlapped = True
+                SOUNDS['wing'].play()
+
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
                 if playery > -2 * IMAGES['player'][0].get_height():
                     playerVelY = playerFlapAcc
@@ -408,7 +382,7 @@ def getRandomPipe():
     gapY = random.randrange(0, int(BASEY * 0.6 - PIPEGAPSIZE))
     gapY += int(BASEY * 0.2)
     pipeHeight = IMAGES['pipe'][0].get_height()
-    pipeX = SCREENWIDTH + 10
+    pipeX = SCREENWIDTH + 10    
 
     return [
         {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe
@@ -497,4 +471,4 @@ def getHitmask(image):
 
 
 if __name__ == '__main__':
-    main()
+    run_model(None)
