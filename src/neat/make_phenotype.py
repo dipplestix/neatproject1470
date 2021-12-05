@@ -1,4 +1,4 @@
-from neat_structures import Genome, Gene, GeneList
+from neat.neat_structures import Genome, Gene, GeneList
 from copy import deepcopy
 import torch
 from torch import nn

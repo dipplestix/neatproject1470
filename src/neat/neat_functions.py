@@ -1,5 +1,5 @@
-from neat_structures import Genome, Gene, GeneList
-from make_phenotype import make_network
+from neat.neat_structures import Genome, Gene, GeneList
+from neat.make_phenotype import make_network
 from copy import deepcopy
 from random import random, choice, uniform, sample
 from typing import Callable, List
@@ -44,17 +44,17 @@ def breed(g1: Genome, g2: Genome) -> List:
     else:
         better_parent = g2
         other_parent = g1
-    genome_dic = deepcopy(better_parent.ino_dic)
+    genome_dic = deepcopy(better_parent.gene_list.ino_dic)
     for ino in genome_dic:
-        if ino in other_parent.inos:
-            if not better_parent.ino_dic[ino].active or not other_parent.ino_dic[ino].active:
+        if ino in other_parent.gene_list.inos:
+            if not better_parent.gene_list.ino_dic[ino].active or not other_parent.gene_list.ino_dic[ino].active:
                 if random() < .75:
                     genome_dic[ino].active = False
                 else:
                     genome_dic[ino].active = True
-            genome_dic[ino].w = choice([better_parent.ino_dic[ino].w, other_parent.ino_dic[ino].w])
+            genome_dic[ino].w = choice([better_parent.gene_list.ino_dic[ino].w, other_parent.gene_list.ino_dic[ino].w])
 
-    gene_list = GeneList(genome_dic.values())
+    gene_list = GeneList(list(genome_dic.values()))
 
     return gene_list
 

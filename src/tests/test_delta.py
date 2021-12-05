@@ -1,6 +1,7 @@
-from neat.neat_structures import Genome, Gene
+from neat.neat_structures import Genome, Gene, GeneList
 from neat.neat_functions import delta
 import pytest
+
 
 gene00 = Gene(
     n_in=0,
@@ -42,12 +43,12 @@ gene20 = Gene(
     active=True
 )
 
-genome0 = Genome([gene00, gene10], 0)
-genome1 = Genome([gene01, gene11], 0)
-genome2 = Genome([gene10], 0)
-genome3 = Genome([gene00, gene10, gene20], 0)
-genome4 = Genome([gene01], 0)
-genome5 = Genome([gene10, gene20], 0)
+genome0 = GeneList([gene00, gene10])
+genome1 = GeneList([gene01, gene11])
+genome2 = GeneList([gene10])
+genome3 = GeneList([gene00, gene10, gene20])
+genome4 = GeneList([gene01])
+genome5 = GeneList([gene10, gene20])
 
 
 def test_delta0():
