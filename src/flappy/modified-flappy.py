@@ -205,7 +205,8 @@ def mainGame(movementInfo, model):
                 upper_pipe_x,
                 upper_pipe_y,
                 lower_pipe_x,
-                lower_pipe_y
+                lower_pipe_y,
+                1.0
             ])).item()
 
             if result > 0.5 and playery > -2 * IMAGES['player'][0].get_height():
