@@ -1,4 +1,3 @@
-from neat.neat_structures import Genome, Gene, GeneList
 from copy import deepcopy
 import torch
 from torch import nn
@@ -21,26 +20,24 @@ def make_dics(connections):
     return fwd, rev
 
 
-def make_network(gen: GeneList, last_layer_fun=torch.sigmoid):
+def make_network(gen: GeneList, actual_inputs, actual_outputs, last_layer_fun=torch.sigmoid):
     # Find what's input and output
     fwd, rev = make_dics(gen.active_connects.keys())
-    outputs = [n for n in gen.nodes if n not in fwd.keys()]
-    inputs = [n for n in gen.nodes if n not in rev.keys()]
+    outputs = actual_outputs
+    inputs = actual_inputs
 
     # Record what goes into each layer, the matrix, and what comes out of each layer
     layers = []
     in_ls = []
     out_ls = []
     nn_layers = []
-    max_node = 0
 
     # Go backwards and determine the network graph
     nodes_to_process = deepcopy(outputs)
+    max_node = max(gen.nodes)
     while nodes_to_process:
         next_layer = []
         for n in nodes_to_process:
-            if n>max_node:
-                max_node = n
             try:
                 next_layer.extend(rev[n])
             except KeyError:
@@ -53,10 +50,10 @@ def make_network(gen: GeneList, last_layer_fun=torch.sigmoid):
 
     # Build the model
     for i in range(len(layers) - 1):
-        if i == 0:
-            in_l = inputs
-        else:
-            in_l = layers[i]
+        # if i == 0:
+        #     in_l = inputs
+        # else:
+        in_l = layers[i]
         if i == len(layers) - 1:
             out_l = outputs
         else:
@@ -84,16 +81,22 @@ def make_network(gen: GeneList, last_layer_fun=torch.sigmoid):
             val_in = torch.reshape(val_in, [1, -1])
         assert len(val_in.shape) == 2, 'Requires 2D Tensor'
         values = torch.zeros(val_in.shape[0], max_node + 1)
-        values[:, inputs] = val_in
+#         print(f'layers: {layers}')
+#         print(f'in_ls: {in_ls}')
+#         print(f'out_ls: {out_ls}')
+
+#         [print(g) for g in gen.genes]
+        values[:, actual_inputs]  = val_in
+
         for m, layer in enumerate(nn_layers):
-            ins = values[:, in_ls[i]]
+            ins = values[:, in_ls[m]]
             loop_value = layer(ins)
             if m == len(nn_layers) - 1:
                 loop_value = last_layer_fun(loop_value)
             else:
                 loop_value = torch.sigmoid(loop_value)
-            values[:, out_ls[i]] = loop_value
+            values[:, out_ls[m]] += loop_value
 
-        return values[:, outputs]
+        return values[:, actual_outputs]
 
     return model
