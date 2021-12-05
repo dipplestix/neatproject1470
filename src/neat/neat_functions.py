@@ -29,7 +29,7 @@ def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_siz
         fitness = get_fitness(model)
         population.append(Genome(gene_list, fitness, generation=0))
 
-    return population
+    return population, ino
 
 
 def breed(g1: Genome, g2: Genome) -> List:
