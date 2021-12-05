@@ -16,7 +16,6 @@ def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callabl
     pop, ino = initialization(n_in, n_out, get_fitness, n_pop)
     start = time.time()
     delta_thresh = 3
-    species_dic = {i: 0 for i in pop}
 
     best_fit = -np.inf
     best = None
@@ -32,6 +31,7 @@ def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callabl
     species = [Species(first)]
     for ind in pop[1:]:
         species[0].add(ind)
+    species_dic = {i: species[0] for i in pop}
 
     # Run for however long we tell it to
     while time.time() - start < max_t:

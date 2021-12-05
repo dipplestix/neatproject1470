@@ -148,7 +148,7 @@ def new_link(gene_list: GeneList, ino: int, ino_dic: dict, inputs: List, outputs
 
     new_connection = False
     while not new_connection:
-        to_be_connected = sample(gene_list.nodes, 2)  # Get random new nodes to connect
+        to_be_connected = sample(list(gene_list.nodes), 2)  # Get random new nodes to connect
         node1, node2 = to_be_connected[0], to_be_connected[1]
         if (node1, node2) in gene_list.directedConnects or node2 in inputs or node1 in outputs:  # If existing connection, start over
             continue
