@@ -72,7 +72,7 @@ def test_new_link3():
 
 def test_new_link4():
     new_genes, ino, ino_dic = new_link(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2}, inputs=[0, 1], outputs=[3])
-    assert (2, 3) in new_genes.directedConnects
+    assert (2, 3) in new_genes.directed_connects
 
 
 #     (3)
@@ -100,4 +100,4 @@ def test_new_node3():
 
 def test_new_node4():
     new_genes, ino, ino_dic = new_node(genome, 3, {(0, 2): 0, (1, 2): 1, (2, 3): 2})
-    assert (0, 4) and (4, 2) in new_genes.directedConnects
+    assert (0, 4) and (4, 2) in new_genes.directed_connects

@@ -3,6 +3,7 @@ from neat.make_phenotype import make_network
 from copy import deepcopy
 from random import random, choice, uniform, sample
 from typing import Callable, List
+import torch
 
 
 def initialization(n_inputs: int, n_outputs: int, get_fitness: Callable, pop_size: int = 150, last_layer=torch.sigmoid):
