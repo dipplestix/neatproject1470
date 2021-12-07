@@ -1,5 +1,4 @@
 from copy import deepcopy
-import torch
 from torch import nn
 import torch
 from neat.neat_structures import GeneList
