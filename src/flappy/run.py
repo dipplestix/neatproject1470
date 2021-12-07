@@ -13,7 +13,7 @@ from modified_flappy import *
 def fitness_12(inputs):
     return 12
 
-pop = initialization(7, 2, fitness_12, 10)
+pop = initialization(8, 2, fitness_12, 10)
 
 m = make_network(pop[0].gene_list, torch.nn.Softmax(1))
 

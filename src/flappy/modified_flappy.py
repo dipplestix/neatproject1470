@@ -205,13 +205,13 @@ def mainGame(movementInfo, model):
         result = 0 if not model else model(torch.tensor([
             playerx,
             playery,
+            playerVelY,
             upper_pipe_x,
             upper_pipe_y,
             lower_pipe_x,
             lower_pipe_y,
             1.0
         ]))[0][0].item()
-        result = 1
 
         # based on model, decide to flap if has not flapped already
         if result > 0.5 and playery > -2 * IMAGES['player'][0].get_height() and not playerFlapped:
