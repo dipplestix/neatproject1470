@@ -58,14 +58,14 @@ def test_delta0():
 
 def test_delta1():
     val = delta(genome2, genome3, 1, 2, 3)
-    assert val == pytest.approx(1 * (1 / 3) + 2 * (1 / 3))
+    assert val == pytest.approx(1 * (1) + 2 * (1))
 
 
 def test_delta2():
     val = delta(genome3, genome4, 1, 2, 3)
-    assert val == pytest.approx(1 * (2 / 3) + 3 * 0.2)
+    assert val == pytest.approx(1 * (2 / 1) + 3 * 0.2)
 
 
 def test_delta3():
     val = delta(genome1, genome5, 1, 2, 3)
-    assert val == pytest.approx(1 * (1 / 2) + 2 * (1 / 2) + 3 * 0.6)
+    assert val == pytest.approx(1 * (1 / 1) + 2 * (1 / 1) + 3 * 0.6)
