@@ -5,11 +5,13 @@ import pygame
 from pygame.locals import *
 import torch
 
-FPS = 30
+SCALE = 1 # CHANGE THIS TO 990/30 FOR FASTEST SPEED
+
+FPS = 30 * SCALE
 # SCREENWIDTH = 288
 SCREENWIDTH = 288
 SCREENHEIGHT = 512
-PIPEGAPSIZE = 100  # gap between upper and lower part of pipe
+PIPEGAPSIZE = 120 # gap between upper and lower part of pipe
 BASEY = SCREENHEIGHT * 0.79
 # image, sound and hitmask  dicts
 IMAGES, SOUNDS, HITMASKS = {}, {}, {}
@@ -165,7 +167,7 @@ def mainGame(movementInfo, model):
     ]
 
     dt = FPSCLOCK.tick(FPS)/1000
-    pipeVelX = -128 * dt
+    pipeVelX = -4
 
     # player velocity, max velocity, downward acceleration, acceleration on flap
     playerVelY = -9   # player's velocity along Y, default same as playerFlapped
@@ -202,13 +204,13 @@ def mainGame(movementInfo, model):
         upper_pipe_y = next_upper_pipe['y']
         lower_pipe_x = next_lower_pipe['x']
         lower_pipe_y = next_lower_pipe['y']
+
         result = 0 if not model else model(torch.tensor([
             playerx,
             playery,
             playerVelY,
             upper_pipe_x,
             upper_pipe_y,
-            lower_pipe_x,
             lower_pipe_y,
             1.0
         ]))[0][0].item()
@@ -223,7 +225,9 @@ def mainGame(movementInfo, model):
         # check for crash here
         crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
                                upperPipes, lowerPipes)
-        if crashTest[0]:
+
+        # end if score above 20 (TO PREVENT INFINITE RUNS)
+        if crashTest[0] or score > 20:
             return {
                 'y': playery,
                 'groundCrash': crashTest[1],
@@ -271,7 +275,7 @@ def mainGame(movementInfo, model):
             lPipe['x'] += pipeVelX
 
         # add new pipe when first pipe is about to touch left of screen
-        if 3 > len(upperPipes) > 0 and 0 < upperPipes[0]['x'] < 5:
+        if 3 > len(upperPipes) > 0 and upperPipes[0]['x'] < 5:
             newPipe = getRandomPipe()
             upperPipes.append(newPipe[0])
             lowerPipes.append(newPipe[1])
@@ -382,7 +386,9 @@ def getRandomPipe():
     gapY = random.randrange(0, int(BASEY * 0.6 - PIPEGAPSIZE))
     gapY += int(BASEY * 0.2)
     pipeHeight = IMAGES['pipe'][0].get_height()
-    pipeX = SCREENWIDTH + 10    
+    pipeX = SCREENWIDTH + 10 
+
+    gapY = random.randrange(50, 150) # REMOVE THIS TO MAKE GAME HARDER
 
     return [
         {'x': pipeX, 'y': gapY - pipeHeight},  # upper pipe
@@ -471,4 +477,4 @@ def getHitmask(image):
 
 
 if __name__ == '__main__':
-    run_model(None)
+    print(run_model(None))

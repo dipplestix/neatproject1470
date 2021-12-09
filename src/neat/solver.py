@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np
 from random import random
 import time
+import torch
 
 
 def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callable, n_pop: int = 150, max_t: int = 10):
@@ -129,6 +130,7 @@ def solve(n_in: int, n_out: int, get_fitness: Callable, last_layer_func: Callabl
                 print(new_fit)
                 best_fit = new_fit
                 best = new_ind
+                torch.save(new_ind, 'best.pt') # SAVE BEST MODEL
 
             new_pop.append(new_ind)
 
