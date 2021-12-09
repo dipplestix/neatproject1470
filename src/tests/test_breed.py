@@ -34,25 +34,25 @@ genome_1 = Genome(GeneList([gene_1_0]), 8)
 
 
 def test_breed_size():
-    child = breed(genome_0_low, genome_1)
+    child = breed(genome_0_low.gene_list, genome_1.gene_list, 5, 8)
     assert len(child.genes) == 1
 
 
 def test_breed_size2():
-    child = breed(genome_0_high, genome_1)
+    child = breed(genome_0_high.gene_list, genome_1.gene_list, 27, 8)
     assert len(child.genes) == 2
 
 
 def test_breed_weights():
-    child = breed(genome_0_high, genome_1)
+    child = breed(genome_0_high.gene_list, genome_1.gene_list, 27, 8)
     assert child.genes[0].w == .3 or child.genes[0].w == .7
 
 
 def test_breed_weights2():
-    child = breed(genome_0_high, genome_1)
+    child = breed(genome_0_high.gene_list, genome_1.gene_list, 27, 8)
     assert child.genes[1].w == .12
     
 
 def test_breed_ino_dic():
-    child = breed(genome_0_high, genome_1)
+    child = breed(genome_0_high.gene_list, genome_1.gene_list, 27, 8)
     assert len(child.genes) == 2
