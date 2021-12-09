@@ -9,14 +9,17 @@ import torch
 from torch import nn
 from neat.neat_functions import *
 from modified_flappy import *
+from neat.solver import *
 
-def fitness_12(inputs):
-    return 12
+# def fitness_12(inputs):
+#     return 12
 
-pop = initialization(8, 2, fitness_12, 10)
+# pop = initialization(8, 2, fitness_12, 10)
 
-m = make_network(pop[0].gene_list, torch.nn.Softmax(1))
+# m = make_network(pop[0].gene_list, torch.nn.Softmax(1))
 
-score = run_model(m)
+# score = run_model(m)
 
-print(f"SCORE: {score}")
+# print(f"SCORE: {score}")
+
+best, gen = solve(7, 2, run_model, torch.nn.Softmax(1), n_pop=300, max_t=float('inf'))
